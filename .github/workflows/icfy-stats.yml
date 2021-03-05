@@ -30,7 +30,6 @@ jobs:
       - name: Build ICFY stats
         env:
           NODE_ENV: production
-          BROWSERSLIST_ENV: defaults
           WORKERS: 2
         run: yarn run analyze-icfy
       - run: mkdir icfy-stats && mv client/{chart,stats}.json icfy-stats
