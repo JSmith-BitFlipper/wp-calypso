@@ -11,6 +11,8 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 
+process.env.BROWSERSLIST_ENV = process.env.BROWSERSLIST_ENV || 'wpcom';
+
 if ( ! process.argv.some( ( arg ) => arg.startsWith( '--config' ) ) ) {
 	let webpackConfig = path.join( process.cwd(), 'webpack.config.js' );
 	if ( ! fs.existsSync( webpackConfig ) ) {
