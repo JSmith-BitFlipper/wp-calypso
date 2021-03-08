@@ -8,5 +8,4 @@ module.exports = {
 	globals: {
 		__i18n_text_domain__: 'default',
 	},
-	setupFilesAfterEnv: [ path.join( __dirname, './setup-test-framework.js' ) ],
 };
