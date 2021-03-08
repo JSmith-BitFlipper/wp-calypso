@@ -12,8 +12,6 @@
  * @returns {object} Webpack loader object
  */
 
-process.env.BROWSERSLIST_ENV = process.env.BROWSERSLIST_ENV || 'wpcom';
-
 module.exports.loader = ( {
 	workerCount,
 	configFile,
