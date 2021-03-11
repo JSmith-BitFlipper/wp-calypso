@@ -377,31 +377,6 @@ const DomainPicker: FunctionComponent< Props > = ( {
 													const isAvailable = availabilityStatus
 														? domainIsAvailableStatus?.indexOf( availabilityStatus ) > -1
 														: true;
-													if ( suggestion?.unavailable ) {
-														return (
-															<SuggestionItem
-																ref={ ( ref ) => {
-																	suggestionRefs.current[ index ] = ref;
-																} }
-																domain={ suggestion.domain_name }
-																isUnavailable={ ! isAvailable || suggestion?.unavailable }
-																onRender={ () =>
-																	handleItemRender(
-																		suggestion.domain_name,
-																		`${ baseRailcarId }${ index }`,
-																		index,
-																		isRecommended
-																	)
-																}
-																onSelect={ () => {
-																	onDomainSelect( suggestion );
-																} }
-																railcarId={
-																	baseRailcarId ? `${ baseRailcarId }${ index }` : undefined
-																}
-															/>
-														);
-													}
 													return (
 														<SuggestionItem
 															ref={ ( ref ) => {
@@ -410,7 +385,7 @@ const DomainPicker: FunctionComponent< Props > = ( {
 															key={ suggestion.domain_name }
 															domain={ suggestion.domain_name }
 															cost={ suggestion.cost }
-															isUnavailable={ ! isAvailable }
+															isUnavailable={ ! isAvailable || suggestion?.unavailable }
 															isLoading={
 																currentDomain?.domain_name === suggestion.domain_name &&
 																isCheckingDomainAvailability
