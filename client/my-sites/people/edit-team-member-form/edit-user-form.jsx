@@ -4,7 +4,7 @@
 import React, { Fragment } from 'react';
 import { localize } from 'i18n-calypso';
 import debugModule from 'debug';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 
 /**
  * Internal dependencies
@@ -25,8 +25,7 @@ import {
 	requestExternalContributorsRemoval,
 } from 'calypso/state/data-getters';
 import isSiteWPForTeams from 'calypso/state/selectors/is-site-wpforteams';
-import useUpdateUserMutation from 'calypso/data/users/use-update-user-mutation';
-import { errorNotice, successNotice } from 'calypso/state/notices/actions';
+import withUpdateUser from './with-update-user';
 
 /**
  * Style dependencies
@@ -43,6 +42,12 @@ class EditUserForm extends React.Component {
 
 	UNSAFE_componentWillReceiveProps( nextProps ) {
 		this.setState( this.getStateObject( nextProps ) );
+	}
+
+	componentDidUpdate() {
+		if ( ! this.hasUnsavedSettings() ) {
+			this.props.markSaved();
+		}
 	}
 
 	getRole( roles ) {
@@ -76,21 +81,21 @@ class EditUserForm extends React.Component {
 	}
 
 	getAllowedSettingsToChange() {
-		const currentUser = this.props.currentUser;
+		const { currentUser, user, isJetpack } = this.props;
 		const allowedSettings = [];
 
-		if ( ! this.state.ID ) {
+		if ( ! user?.ID ) {
 			return allowedSettings;
 		}
 
 		// On WP.com sites, a user should only be able to update role.
 		// A user should not be able to update own role.
-		if ( this.props.isJetpack ) {
-			if ( ! this.state.linked_user_ID || this.state.linked_user_ID !== currentUser.ID ) {
+		if ( isJetpack ) {
+			if ( ! user.linked_user_ID || user.linked_user_ID !== currentUser.ID ) {
 				allowedSettings.push( 'roles', 'isExternalContributor' );
 			}
 			allowedSettings.push( 'first_name', 'last_name', 'name' );
-		} else if ( this.state.ID !== currentUser.ID ) {
+		} else if ( user.ID !== currentUser.ID ) {
 			allowedSettings.push( 'roles', 'isExternalContributor' );
 		}
 
@@ -104,10 +109,12 @@ class EditUserForm extends React.Component {
 	updateUser = ( event ) => {
 		event.preventDefault();
 
+		const { siteId, user, markSaved } = this.props;
+
 		const changedSettings = this.getChangedSettings();
 		debug( 'Changed settings: ' + JSON.stringify( changedSettings ) );
 
-		this.props.markSaved();
+		markSaved();
 
 		// Since we store 'roles' in state as a string, but user objects expect
 		// roles to be an array, if we've updated the user's role, we need to
@@ -116,17 +123,17 @@ class EditUserForm extends React.Component {
 			? Object.assign( changedSettings, { roles: [ changedSettings.roles ] } )
 			: changedSettings;
 
-		this.props.updateUser( this.state.ID, changedAttributes );
+		this.props.updateUser( user.ID, changedAttributes );
 
 		if ( true === changedSettings.isExternalContributor ) {
 			requestExternalContributorsAddition(
-				this.props.siteId,
-				undefined !== this.state.linked_user_ID ? this.state.linked_user_ID : this.state.ID
+				siteId,
+				undefined !== user.linked_user_ID ? user.linked_user_ID : user.ID
 			);
 		} else if ( false === changedSettings.isExternalContributor ) {
 			requestExternalContributorsRemoval(
-				this.props.siteId,
-				undefined !== this.state.linked_user_ID ? this.state.linked_user_ID : this.state.ID
+				siteId,
+				undefined !== user.linked_user_ID ? user.linked_user_ID : user.ID
 			);
 		}
 
@@ -147,7 +154,7 @@ class EditUserForm extends React.Component {
 	isExternalRole = ( role ) =>
 		[ 'administrator', 'editor', 'author', 'contributor' ].includes( role );
 
-	renderField( fieldId ) {
+	renderField = ( fieldId ) => {
 		let returnField = null;
 		switch ( fieldId ) {
 			case 'roles':
@@ -229,23 +236,18 @@ class EditUserForm extends React.Component {
 		}
 
 		return returnField;
-	}
+	};
 
 	render() {
-		let editableFields;
-		if ( ! this.state.ID ) {
+		if ( ! this.props.user?.ID ) {
 			return null;
 		}
 
-		editableFields = this.getAllowedSettingsToChange();
+		const editableFields = this.getAllowedSettingsToChange();
 
 		if ( ! editableFields.length ) {
 			return null;
 		}
-
-		editableFields = editableFields.map( ( fieldId ) => {
-			return this.renderField( fieldId );
-		} );
 
 		return (
 			<form
@@ -254,7 +256,7 @@ class EditUserForm extends React.Component {
 				onSubmit={ this.updateUser }
 				onChange={ this.props.markChanged }
 			>
-				{ editableFields }
+				{ editableFields.map( this.renderField ) }
 				<FormButtonsBar>
 					<FormButton disabled={ ! this.hasUnsavedSettings() }>
 						{ this.props.translate( 'Save changes', {
@@ -266,43 +268,6 @@ class EditUserForm extends React.Component {
 		);
 	}
 }
-
-const withUpdateUser = ( Component ) => {
-	return ( props ) => {
-		const { siteId, user, translate } = props;
-		const dispatch = useDispatch();
-		const { updateUser, isSuccess, isError, error } = useUpdateUserMutation( siteId, user?.login );
-
-		React.useEffect( () => {
-			isSuccess &&
-				dispatch(
-					successNotice(
-						translate( 'Successfully updated @%(user)s', {
-							args: { user: user?.login },
-							context: 'Success message after a user has been modified.',
-						} ),
-						{ id: 'update-user-notice' }
-					)
-				);
-		}, [ isSuccess, translate, dispatch, user ] );
-
-		React.useEffect( () => {
-			isError &&
-				error &&
-				dispatch(
-					errorNotice(
-						translate( 'There was an error updating @%(user)s', {
-							args: { user: user?.login },
-							context: 'Error message after A site has failed to perform actions on a user.',
-						} ),
-						{ id: 'update-user-notice' }
-					)
-				);
-		}, [ isError, error, translate, dispatch, user ] );
-
-		return <Component { ...props } updateUser={ updateUser } />;
-	};
-};
 
 export default localize(
 	connect(
