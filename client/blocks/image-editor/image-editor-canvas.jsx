@@ -103,6 +103,7 @@ export class ImageEditorCanvas extends Component {
 
 		req.open( 'GET', src, true );
 		req.responseType = 'arraybuffer';
+		req.withCredentials = true;
 
 		req.onload = () => {
 			if ( ! this.isMounted ) {
