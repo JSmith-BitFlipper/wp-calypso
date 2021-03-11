@@ -64,14 +64,16 @@ export const EditTeamMemberForm = ( {
 			<HeaderCake onClick={ goBack } isCompact />
 			<Card className="edit-team-member-form__user-profile">
 				<PeopleProfile siteId={ siteId } user={ user } />
-				<EditUserForm
-					user={ user }
-					disabled={ false } // @TODO added when added mutation to remove user
-					siteId={ siteId }
-					isJetpack={ isJetpack }
-					markChanged={ markChanged }
-					markSaved={ markSaved }
-				/>
+				{ user && (
+					<EditUserForm
+						user={ user }
+						disabled={ false } // @TODO added when added mutation to remove user
+						siteId={ siteId }
+						isJetpack={ isJetpack }
+						markChanged={ markChanged }
+						markSaved={ markSaved }
+					/>
+				) }
 			</Card>
 			{ user && (
 				<DeleteUser
