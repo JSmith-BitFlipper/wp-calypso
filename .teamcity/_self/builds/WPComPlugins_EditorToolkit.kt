@@ -106,6 +106,18 @@ object WPComPlugins_EditorToolKit : BuildType({
 			"""
 			dockerImage = "%docker_image_wpcom%"
 		}
+		bashNodeScript {
+			name = "Run PHP unit tests"
+			scriptContent = """
+				cd apps/editing-toolkit
+				
+				# Add Gutenberg to wp-env:
+				echo '{ "plugins": [ "./editing-toolkit-plugin", "https://downloads.wordpress.org/plugin/gutenberg.latest-stable.zip" ], "themes": [] }' > .wp-env.override.json
+
+				yarn wp-env start
+				yarn test:php
+			"""
+		}
 		/**
 		 * We download the archive directly in this step rather than relying on
 		 * an artifact dependency. We do this because if two commits on trunk
