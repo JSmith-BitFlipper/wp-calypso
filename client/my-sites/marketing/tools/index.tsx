@@ -54,7 +54,8 @@ export const MarketingTools: FunctionComponent = () => {
 	const dispatch = useDispatch();
 	const recordTracksEvent = ( event: string ) => dispatch( recordTracksEventAction( event ) );
 	const [ showGuide, setShowGuide ] = useState( false );
-	const toggleWhatsNew = () => setShowGuide( ! showGuide );
+	const openWhatsNew = () => setShowGuide( true );
+	const closeWhatsNew = () => setShowGuide( false );
 
 	const userId = useSelector( ( state ) => getCurrentUserId( state ) ) || 0;
 	const selectedSiteSlug: T.SiteSlug | null = useSelector( ( state ) =>
@@ -116,9 +117,9 @@ export const MarketingTools: FunctionComponent = () => {
 		<Fragment>
 			{ ! purchases && <QueryUserPurchases userId={ userId } /> }
 			<PageViewTracker path="/marketing/tools/:site" title="Marketing > Tools" />
-			<Button onClick={ toggleWhatsNew }> Click Me!</Button>
+			<Button onClick={ openWhatsNew }> Click Me!</Button>
 
-			{ showGuide && <WhatsNewGuide toggleWhatsNew={ toggleWhatsNew } /> }
+			{ showGuide && <WhatsNewGuide onClose={ closeWhatsNew } /> }
 
 			<MarketingToolsHeader handleButtonClick={ handleBusinessToolsClick } />
 
