@@ -3,9 +3,10 @@
  */
 import { useDispatch, useSelector } from 'react-redux';
 import page from 'page';
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { Fragment, FunctionComponent, useState } from 'react';
 import { useTranslate, getLocaleSlug } from 'i18n-calypso';
 import config from '@automattic/calypso-config';
+import WhatsNewGuide from '@automattic/whats-new';
 
 /**
  * Internal dependencies
@@ -52,6 +53,9 @@ export const MarketingTools: FunctionComponent = () => {
 	const translate = useTranslate();
 	const dispatch = useDispatch();
 	const recordTracksEvent = ( event: string ) => dispatch( recordTracksEventAction( event ) );
+	const [ showGuide, setShowGuide ] = useState( false );
+	const toggleWhatsNew = () => setShowGuide( ! showGuide );
+
 	const userId = useSelector( ( state ) => getCurrentUserId( state ) ) || 0;
 	const selectedSiteSlug: T.SiteSlug | null = useSelector( ( state ) =>
 		getSelectedSiteSlug( state )
@@ -112,6 +116,9 @@ export const MarketingTools: FunctionComponent = () => {
 		<Fragment>
 			{ ! purchases && <QueryUserPurchases userId={ userId } /> }
 			<PageViewTracker path="/marketing/tools/:site" title="Marketing > Tools" />
+			<Button onClick={ toggleWhatsNew }> Click Me!</Button>
+
+			{ showGuide && <WhatsNewGuide toggleWhatsNew={ toggleWhatsNew } /> }
 
 			<MarketingToolsHeader handleButtonClick={ handleBusinessToolsClick } />
 
