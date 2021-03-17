@@ -52,8 +52,51 @@ afterEach( function () {
 	}
 } );
 
-// Take Screenshot
+// Take Screenshot for Playwright.
 afterEach( async function () {
+	if ( ! global.isPlaywright ) {
+		return;
+	}
+
+	this.timeout( afterHookTimeoutMS );
+
+	// If no test has been run, don't bother.
+	if ( ! this.currentTest ) {
+		return;
+	}
+	// If option is set to never save screenshots, then don't bother.
+	const doNotSaveScreenshot = config.get( 'neverSaveScreenshots' );
+	if ( doNotSaveScreenshot ) {
+		return;
+	}
+	// If test is passed and option to always save screenshot is not set,
+	// don't bother.
+	const saveAllScreenshot = config.get( 'saveAllScreenshots' );
+	if ( this.currentTest.state === 'passed' && ! saveAllScreenshot ) {
+		return;
+	}
+
+	// Now let's get to work saving the screenshot.
+	// Retrieve the failing page, obtain the test title, viewport dimensions, timestamp.
+	// Then call Playwright's built-in screenshot utility and save it as PNG.
+	const page = this.currentTest.page;
+	const shortTestFileName = this.currentTest.title.replace( /[^a-z0-9]/gi, '-' ).toLowerCase();
+	const dimensions = page.viewportSize();
+	const dimensionsFileName = dimensions.width + 'x' + dimensions.height;
+	const date = new Date().getTime().toString();
+	const fileName = `FAILED-${ dimensionsFileName }-${ shortTestFileName }-${ date }`;
+	const dirName = mediaHelper.screenshotsDir;
+	const screenshotPath = `${ dirName }/${ fileName }.png`;
+
+	return await page.screenshot( { path: screenshotPath } );
+} );
+
+// Take Screenshot for Selenium.
+afterEach( async function () {
+	// Do not run this hook if Playwright. It has its own hook for screenshots.
+	if ( global.isPlaywright ) {
+		return;
+	}
 	this.timeout( afterHookTimeoutMS );
 	if ( ! this.currentTest ) {
 		return;
@@ -111,6 +154,9 @@ afterEach( async function () {
 
 // Dismiss any alerts for switching away
 afterEach( async function () {
+	if ( global.isPlaywright ) {
+		return;
+	}
 	await this.timeout( afterHookTimeoutMS );
 	const driver = global.__BROWSER__;
 
