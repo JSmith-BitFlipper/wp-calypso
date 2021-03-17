@@ -68,4 +68,13 @@ export default {
 		defaultVariation: 'withoutSocialProof_control',
 		allowExistingUsers: true,
 	},
+	pricingPagePopularProducts: {
+		datestamp: '20210323',
+		variations: {
+			withComplete_control: 50,
+			withSecurityRT_test: 50,
+		},
+		defaultVariation: 'withComplete_control',
+		allowExistingUsers: true,
+	},
 };

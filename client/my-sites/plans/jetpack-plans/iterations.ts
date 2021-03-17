@@ -10,6 +10,7 @@ import { getUrlParts } from 'calypso/lib/url/url-parts';
 
 export enum Iterations {
 	SPROOF = 'jetpackSocialProofHeader',
+	SECURITY = 'securityPopularProducts',
 }
 
 const iterationNames: string[] = Object.values( Iterations );
@@ -42,7 +43,17 @@ const getCurrentCROIterationName = (): Iterations | null => {
 	}
 
 	const showSocialProofHeader = abtest( 'jetpackSocialProofHeader' ) === 'withSocialProof_test';
-	return showSocialProofHeader ? Iterations.SPROOF : null;
+	const showSecurityProducts = abtest( 'pricingPagePopularProducts' ) === 'withSecurityRT_test';
+
+	if ( showSocialProofHeader ) {
+		return Iterations.SPROOF;
+	}
+
+	if ( showSecurityProducts ) {
+		return Iterations.SECURITY;
+	}
+
+	return null;
 };
 
 type IterationValueFunction< T > = ( key: Iterations | null ) => T | undefined;
