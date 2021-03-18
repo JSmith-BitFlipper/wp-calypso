@@ -13,6 +13,7 @@ import * as slackNotifier from './slack-notifier';
 
 import * as mediaHelper from './media-helper';
 
+import * as browserManager from './browser-manager';
 import * as driverManager from './driver-manager';
 import * as driverHelper from './driver-helper';
 import * as videoRecorder from '../lib/video-recorder';
@@ -170,6 +171,13 @@ after( function () {
 	}
 
 	this.timeout( afterHookTimeoutMS );
+
+	// Playwright path.
+	if ( global.isPlaywright === true ) {
+		return browserManager.quitBrowser();
+	}
+
+	// Selenium WebDriver path.
 	const driver = global.__BROWSER__;
 
 	if (
