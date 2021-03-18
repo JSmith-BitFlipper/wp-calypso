@@ -13,7 +13,7 @@ import debugFactory from 'debug';
 import { recordTracksEvent } from 'calypso/lib/analytics/tracks';
 import { reduxDispatch } from 'calypso/lib/redux-bridge';
 import { getRenewalItemFromProduct } from 'calypso/lib/cart-values/cart-items';
-import { getPlan } from 'calypso/lib/plans';
+import { getPlan, isWpComMonthlyPlan } from 'calypso/lib/plans';
 import { isMonthly as isMonthlyPlan } from 'calypso/lib/plans/constants';
 import {
 	getProductFromSlug,
@@ -114,6 +114,14 @@ function getDisplayName( purchase ) {
 	if ( jetpackProductsDisplayNames[ purchase.productSlug ] ) {
 		return jetpackProductsDisplayNames[ purchase.productSlug ];
 	}
+
+	if ( isWpComMonthlyPlan( purchase.productSlug ) ) {
+		return i18n.translate( '%s Monthly', {
+			args: getName( purchase ),
+			comment: '%s will be a dotcom plan name. e.g. WordPress.com Business Monthly',
+		} );
+	}
+
 	return getName( purchase );
 }
 
