@@ -37,6 +37,13 @@ export interface APIError {
 	message: string;
 }
 
+// The API-returned license object is not quite consistent right now so we only define the properties we actively rely on.
+export interface APILicense {
+	license_key: string;
+	issued_at: string;
+	revoked_at: string | null;
+}
+
 /**
  * Store.
  */

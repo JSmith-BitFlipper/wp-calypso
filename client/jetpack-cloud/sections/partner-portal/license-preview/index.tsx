@@ -179,6 +179,7 @@ export default function LicensePreview( {
 			{ isOpen && (
 				<LicenseDetails
 					licenseKey={ licenseKey }
+					product={ product }
 					username={ username }
 					blogId={ blogId }
 					issuedAt={ issuedAt }

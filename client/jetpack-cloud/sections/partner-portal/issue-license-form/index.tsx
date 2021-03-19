@@ -5,7 +5,6 @@ import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useMutation, useQuery } from 'react-query';
 import { useTranslate } from 'i18n-calypso';
-import classnames from 'classnames';
 import page from 'page';
 
 /**
@@ -16,7 +15,7 @@ import wpcom, { wpcomJetpackLicensing as wpcomJpl } from 'calypso/lib/wp';
 import { addQueryArgs } from 'calypso/lib/url';
 import { errorNotice } from 'calypso/state/notices/actions';
 import SelectDropdown from 'calypso/components/select-dropdown';
-import Spinner from 'calypso/components/spinner';
+import { APILicense } from 'calypso/state/partner-portal/types';
 
 /**
  * Style dependencies
@@ -26,10 +25,6 @@ import './style.scss';
 interface ProductOption {
 	value: string;
 	label: string;
-}
-
-interface APILicense {
-	license_key: string;
 }
 
 export interface APIProductFamilyProduct {
@@ -119,16 +114,12 @@ export default function IssueLicenseForm(): ReactElement {
 				<Button href="/partner-portal">{ translate( 'Go back' ) }</Button>
 
 				<Button
-					className={ classnames( 'issue-license-form__issue-button', {
-						'issue-license-form__issue-button--is-loading': mutation.isLoading,
-					} ) }
 					primary
-					disabled={ query.isLoading || mutation.isLoading }
+					busy={ mutation.isLoading }
+					disabled={ query.isLoading }
 					onClick={ onIssueLicense }
 				>
 					<span>{ translate( 'Issue License' ) }</span>
-
-					{ mutation.isLoading && <Spinner /> }
 				</Button>
 			</div>
 		</Card>
