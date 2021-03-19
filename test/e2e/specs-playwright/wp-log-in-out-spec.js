@@ -1,24 +1,18 @@
 /**
  * External dependencies
  */
+import config from 'config';
 
-import playwright from 'playwright';
+/**
+ * Internal dependencies
+ */
+import * as browserManager from '../lib/browser-manager';
 
 import LoginPage from '../lib/pages/login-page';
 
-describe( `Auth Screen @canary @parallel`, function () {
-<<<<<<< HEAD
-	this.timeout( 30000 );
-	let page;
-	let browser;
+const mochaTimeOut = config.get( 'mochaTimeoutMS' );
 
-	before( 'Start browser', async function () {
-		browser = await playwright.chromium.launch( {
-			headless: false,
-		} );
-		const browserContext = await browser.newContext();
-		page = await browserContext.newPage();
-=======
+describe( `Auth Screen @canary @parallel`, function () {
 	this.timeout( mochaTimeOut );
 
 	let browserContext;
@@ -31,7 +25,6 @@ describe( `Auth Screen @canary @parallel`, function () {
 	beforeEach( 'Open new test tab', async function () {
 		page = await browserContext.newPage();
 		this.currentTest.page = page;
->>>>>>> ab56b7968b... Implement ability to save screenshot using Playwright.
 	} );
 
 	describe( 'Loading the log-in page', function () {
@@ -44,11 +37,4 @@ describe( `Auth Screen @canary @parallel`, function () {
 			return await page.click( 'invalid_selector' );
 		} );
 	} );
-<<<<<<< HEAD
-
-	after( 'close browser', function () {
-		browser.close();
-	} );
-=======
->>>>>>> ab56b7968b... Implement ability to save screenshot using Playwright.
 } );
