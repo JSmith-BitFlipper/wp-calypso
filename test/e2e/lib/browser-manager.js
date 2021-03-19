@@ -1,4 +1,9 @@
 /**
+ * @file Manages instance of Playwright Browser and BrowserContext.
+ * @author Edwin Takahashi
+ */
+
+/**
  * External dependencies
  */
 import config from 'config';
@@ -91,13 +96,8 @@ export async function launchBrowser() {
 		isHeadless = false;
 	}
 
-	// const userAgent = `user-agent=Mozilla/5.0 (wp-e2e-tests) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${ browser.version() } Safari/537.36`;
 	const dimension = getScreenDimension();
 	return await playwright.chromium.launch( {
-		// logger: {
-		//     isEnabled: () => true,
-		//     log: (severity, message, args) => console.log(`${new Date().toISOString()} ${process.pid} ${severity} ${message} ${args}`)
-		// },
 		headless: isHeadless,
 		args: [ '--window-position=0,0', `--window-size=${ dimension.width },${ dimension.height }` ],
 		timeout: browserStartTimeoutMS,
