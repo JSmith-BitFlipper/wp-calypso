@@ -11,6 +11,9 @@ import playwright from 'playwright';
 
 const browserStartTimeoutMS = 2000;
 
+export let browser;
+export const isPlaywright = true;
+
 /**
  * Returns the target screen size for tests to run against.
  *
@@ -70,12 +73,12 @@ export function getScreenDimension() {
  */
 export async function newBrowserContext() {
 	// If no existing instance of a Browser, then launch a new instance.
-	if ( ! global.__BROWSER__ ) {
-		global.__BROWSER__ = await launchBrowser();
+	if ( browser === undefined ) {
+		browser = await launchBrowser();
 	}
 
 	// Generate a new BrowserContext.
-	return await global.__BROWSER__.newContext( {
+	return await browser.newContext( {
 		viewport: null, // Do not override window size set in the browser launch parameters.
 	} );
 }
@@ -89,8 +92,6 @@ export async function newBrowserContext() {
  * @returns {Promise<playwright.Browser>} New Browser instance.
  */
 export async function launchBrowser() {
-	global.isPlaywright = true;
-
 	let isHeadless = true;
 	if ( ! process.env.HEADLESS || ! config.has( 'headless' ) ) {
 		isHeadless = false;
@@ -113,7 +114,6 @@ export async function launchBrowser() {
  *
  */
 export function quitBrowser() {
-	const browser = global.__BROWSER__;
-	global.__BROWSER__ = null;
-	return browser.close();
+	browser.close();
+	browser = null;
 }

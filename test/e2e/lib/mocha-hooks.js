@@ -165,19 +165,19 @@ after( async function () {
 
 // Quit browser
 after( function () {
+	this.timeout( afterHookTimeoutMS );
+
+	// Playwright path.
+	if ( browserManager.isPlaywright === true ) {
+		return browserManager.quitBrowser();
+	}
+
+	// Selenium WebDriver path.
 	if ( ! global.__BROWSER__ ) {
 		// Early return if there's no browser, i.e. when all specs were skipped.
 		return;
 	}
 
-	this.timeout( afterHookTimeoutMS );
-
-	// Playwright path.
-	if ( global.isPlaywright === true ) {
-		return browserManager.quitBrowser();
-	}
-
-	// Selenium WebDriver path.
 	const driver = global.__BROWSER__;
 
 	if (

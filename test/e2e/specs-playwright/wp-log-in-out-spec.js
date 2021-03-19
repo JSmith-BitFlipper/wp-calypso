@@ -17,10 +17,8 @@ describe( `Auth Screen @canary @parallel`, function () {
 
 	// BrowserContext is equivalent to the `driver` used in Selenium.
 	let browserContext;
-	/*
-	Page represents a tab in a browser.
-	Test steps interact with the page to execute its instructions.
-	*/
+	// Page represents a tab in a browser.
+	// Test steps interact with the page to execute its instructions.
 	let page;
 
 	before( 'Start browser', async function () {
