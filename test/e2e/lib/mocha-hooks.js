@@ -81,12 +81,12 @@ afterEach( async function () {
 	// Then call Playwright's built-in screenshot utility and save it as PNG.
 	const page = this.currentTest.page;
 	const shortTestFileName = this.currentTest.title.replace( /[^a-z0-9]/gi, '-' ).toLowerCase();
-	const dimensions = page.viewportSize();
-	const dimensionsFileName = dimensions.width + 'x' + dimensions.height;
+	const screenSize = browserManager.targetScreenSize().toUpperCase();
+	const locale = browserManager.targetLocale().toUpperCase();
 	const date = new Date().getTime().toString();
-	const fileName = `FAILED-${ dimensionsFileName }-${ shortTestFileName }-${ date }`;
-	const dirName = mediaHelper.screenshotsDir;
-	const screenshotPath = `${ dirName }/${ fileName }.png`;
+	const fileName = `FAILED-${ locale }-${ screenSize }-${ shortTestFileName }-${ date }`;
+	const screenshotDir = mediaHelper.screenshotsDir;
+	const screenshotPath = `${ screenshotDir }/${ fileName }.png`;
 
 	return await page.screenshot( { path: screenshotPath } );
 } );
