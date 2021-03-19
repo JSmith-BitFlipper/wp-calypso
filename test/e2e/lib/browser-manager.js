@@ -73,7 +73,7 @@ export function getScreenDimension() {
  */
 export async function newBrowserContext() {
 	// If no existing instance of a Browser, then launch a new instance.
-	if ( browser === undefined ) {
+	if ( browser === 'undefined' ) {
 		browser = await launchBrowser();
 	}
 
@@ -115,5 +115,5 @@ export async function launchBrowser() {
  */
 export function quitBrowser() {
 	browser.close();
-	browser = null;
+	browser = undefined;
 }
