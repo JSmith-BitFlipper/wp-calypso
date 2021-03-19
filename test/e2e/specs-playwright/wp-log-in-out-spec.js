@@ -33,8 +33,7 @@ describe( `Auth Screen @canary @parallel`, function () {
 			// Waits for network activity to cease.
 			// Only as a proof of concept. In a production test, should check
 			// for the presence of elements.
-			await page.goto( url, { waitUntill: 'networkidle' } );
-			return await page.click( 'invalid_selector' );
+			return await page.goto( url, { waitUntill: 'networkidle' } );
 		} );
 	} );
 } );
