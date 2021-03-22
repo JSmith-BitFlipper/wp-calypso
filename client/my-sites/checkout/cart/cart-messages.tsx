@@ -33,11 +33,12 @@ export default function CartMessages( {
 
 	const showErrorMessages = useCallback(
 		( messages: ResponseCartMessage[] ) => {
-			const errors = getPrettyErrorMessages( messages, { translate, selectedSiteSlug } );
 			reduxDispatch(
 				errorNotice(
-					errors.map( ( error: CalypsoCartMessage ) => (
-						<p key={ `${ error.code }-${ error.message }` }>{ error.message }</p>
+					messages.map( ( error ) => (
+						<p key={ `${ error.code }-${ error.message }` }>
+							{ getPrettyErrorMessage( error, { translate, selectedSiteSlug } ) }
+						</p>
 					) ),
 					{ isPersistent: true }
 				)
@@ -137,8 +138,8 @@ function getInvalidMultisitePurchaseErrorMessage( {
 	);
 }
 
-function getPrettyErrorMessages(
-	messages: ResponseCartMessage[],
+function getPrettyErrorMessage(
+	error: ResponseCartMessage,
 	{
 		translate,
 		selectedSiteSlug,
@@ -146,30 +147,18 @@ function getPrettyErrorMessages(
 		translate: ReturnType< typeof useTranslate >;
 		selectedSiteSlug: string | null | undefined;
 	}
-): CalypsoCartMessage[] {
-	if ( ! messages ) {
-		return [];
+): TranslateResult | string {
+	switch ( error.code ) {
+		case 'chargeback':
+			return getChargebackErrorMessage( { translate, selectedSiteSlug } );
+
+		case 'blocked':
+			return getBlockedPurchaseErrorMessage( { translate, selectedSiteSlug } );
+
+		case 'invalid-product-multisite':
+			return getInvalidMultisitePurchaseErrorMessage( { translate, message: error.message } );
+
+		default:
+			return error;
 	}
-
-	return messages.map( ( error ) => {
-		switch ( error.code ) {
-			case 'chargeback':
-				return Object.assign( error, {
-					message: getChargebackErrorMessage( { translate, selectedSiteSlug } ),
-				} );
-
-			case 'blocked':
-				return Object.assign( error, {
-					message: getBlockedPurchaseErrorMessage( { translate, selectedSiteSlug } ),
-				} );
-
-			case 'invalid-product-multisite':
-				return Object.assign( error, {
-					message: getInvalidMultisitePurchaseErrorMessage( { translate, message: error.message } ),
-				} );
-
-			default:
-				return error;
-		}
-	} );
 }
