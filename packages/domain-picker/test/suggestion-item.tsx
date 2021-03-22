@@ -29,7 +29,7 @@ const renderComponent = ( props = {} ): RenderResult =>
 describe( 'traintracks events', () => {
 	afterEach( () => {
 		jest.clearAllMocks();
-} );
+	} );
 
 	describe( 'render event', () => {
 		it( 'should send render events when first rendered', async () => {
@@ -60,7 +60,7 @@ describe( 'traintracks events', () => {
 
 			expect( updatedProps.onRender ).toHaveBeenCalledTimes( 2 );
 		} );
-			} );
+	} );
 
 	describe( 'interact event', () => {
 		it( 'should send an interact event when selected', async () => {
@@ -69,9 +69,9 @@ describe( 'traintracks events', () => {
 			fireEvent.click( screen.getByRole( 'button' ) );
 
 			expect( MOCK_PROPS.onSelect ).toHaveBeenCalledWith( MOCK_PROPS.domain );
-			} );
 		} );
-		} );
+	} );
+} );
 
 describe( 'check conditional elements render correctly', () => {
 	/**
