@@ -13,7 +13,7 @@ export const cacheKey = ( siteId, login ) => [ 'user', siteId, login ];
 
 function useUpdateUserMutation( siteId, login ) {
 	const queryClient = useQueryClient();
-	const { mutate, ...mutationObj } = useMutation(
+	const mutation = useMutation(
 		( { userId, variables } ) => wp.req.post( `/sites/${ siteId }/users/${ userId }`, variables ),
 		{
 			// optimistically update user
@@ -38,6 +38,8 @@ function useUpdateUserMutation( siteId, login ) {
 		}
 	);
 
+	const { mutate } = mutation;
+
 	const updateUser = useCallback(
 		( userId, variables = {} ) => {
 			mutate( { userId, variables } );
@@ -45,7 +47,7 @@ function useUpdateUserMutation( siteId, login ) {
 		[ mutate ]
 	);
 
-	return { updateUser, mutate, ...mutationObj };
+	return { updateUser, ...mutation };
 }
 
 export default useUpdateUserMutation;
