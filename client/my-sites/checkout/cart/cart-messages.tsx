@@ -1,40 +1,82 @@
 /**
  * External dependencies
  */
-import React, { useRef, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslate } from 'i18n-calypso';
+import type { TranslateResult } from 'i18n-calypso';
+import { useDisplayCartMessages } from '@automattic/wpcom-checkout';
+import type { ResponseCart, ResponseCartMessage } from '@automattic/shopping-cart';
 
 /**
  * Internal dependencies
  */
 import { errorNotice, successNotice } from 'calypso/state/notices/actions';
-import { getNewMessages } from 'calypso/lib/cart-values';
 import { getSelectedSiteSlug } from 'calypso/state/ui/selectors';
 import { JETPACK_SUPPORT } from 'calypso/lib/url/support';
 
-export default function CartMessages( { cart, isLoadingCart } ) {
-	const previousCart = useRef( null );
+export type CalypsoCartMessage = {
+	code: string;
+	message: string | TranslateResult;
+};
+
+export default function CartMessages( {
+	cart,
+	isLoadingCart,
+}: {
+	cart: ResponseCart;
+	isLoadingCart: boolean;
+} ): null {
 	const reduxDispatch = useDispatch();
 	const selectedSiteSlug = useSelector( getSelectedSiteSlug );
 	const translate = useTranslate();
 
-	useEffect( () => {
-		displayCartMessages( {
-			cart,
-			isLoadingCart,
-			translate,
-			selectedSiteSlug,
-			previousCart: previousCart.current,
-			reduxDispatch,
-		} );
-		previousCart.current = cart;
-	}, [ cart, isLoadingCart, translate, selectedSiteSlug, reduxDispatch ] );
+	const showErrorMessages = useCallback(
+		( messages: ResponseCartMessage[] ) => {
+			const errors = getPrettyErrorMessages( messages, { translate, selectedSiteSlug } );
+			reduxDispatch(
+				errorNotice(
+					errors.map( ( error: CalypsoCartMessage ) => (
+						<p key={ `${ error.code }-${ error.message }` }>{ error.message }</p>
+					) ),
+					{ isPersistent: true }
+				)
+			);
+		},
+		[ selectedSiteSlug, reduxDispatch, translate ]
+	);
+
+	const showSuccessMessages = useCallback(
+		( messages: ResponseCartMessage[] ) => {
+			reduxDispatch(
+				successNotice(
+					messages.map( ( error: CalypsoCartMessage ) => (
+						<p key={ `${ error.code }-${ error.message }` }>{ error.message }</p>
+					) ),
+					{ isPersistent: true }
+				)
+			);
+		},
+		[ reduxDispatch ]
+	);
+
+	useDisplayCartMessages( {
+		cart,
+		isLoadingCart,
+		showErrorMessages,
+		showSuccessMessages,
+	} );
 
 	return null;
 }
 
-function getChargebackErrorMessage( { translate, selectedSiteSlug } ) {
+function getChargebackErrorMessage( {
+	translate,
+	selectedSiteSlug,
+}: {
+	translate: ReturnType< typeof useTranslate >;
+	selectedSiteSlug: string | null | undefined;
+} ) {
 	return translate(
 		'{{strong}}Warning:{{/strong}} One or more transactions linked to this site were refunded due to a contested charge. ' +
 			'This may have happened because of a chargeback by the credit card holder or a PayPal investigation. Each contested ' +
@@ -48,7 +90,13 @@ function getChargebackErrorMessage( { translate, selectedSiteSlug } ) {
 	);
 }
 
-function getBlockedPurchaseErrorMessage( { translate, selectedSiteSlug } ) {
+function getBlockedPurchaseErrorMessage( {
+	translate,
+	selectedSiteSlug,
+}: {
+	translate: ReturnType< typeof useTranslate >;
+	selectedSiteSlug: string | null | undefined;
+} ) {
 	return translate(
 		'Purchases are currently disabled. Please {{a}}contact us{{/a}} to re-enable purchases.',
 		{
@@ -68,7 +116,13 @@ function getBlockedPurchaseErrorMessage( { translate, selectedSiteSlug } ) {
 	);
 }
 
-function getInvalidMultisitePurchaseErrorMessage( { translate, message } ) {
+function getInvalidMultisitePurchaseErrorMessage( {
+	translate,
+	message,
+}: {
+	translate: ReturnType< typeof useTranslate >;
+	message: string;
+} ) {
 	return (
 		<>
 			{ message }&nbsp;
@@ -83,7 +137,16 @@ function getInvalidMultisitePurchaseErrorMessage( { translate, message } ) {
 	);
 }
 
-function getPrettyErrorMessages( messages, { translate, selectedSiteSlug } ) {
+function getPrettyErrorMessages(
+	messages: ResponseCartMessage[],
+	{
+		translate,
+		selectedSiteSlug,
+	}: {
+		translate: ReturnType< typeof useTranslate >;
+		selectedSiteSlug: string | null | undefined;
+	}
+): CalypsoCartMessage[] {
 	if ( ! messages ) {
 		return [];
 	}
@@ -109,44 +172,4 @@ function getPrettyErrorMessages( messages, { translate, selectedSiteSlug } ) {
 				return error;
 		}
 	} );
-}
-
-function displayCartMessages( {
-	cart,
-	isLoadingCart,
-	translate,
-	selectedSiteSlug,
-	previousCart,
-	reduxDispatch,
-} ) {
-	const newCart = cart;
-	if ( isLoadingCart ) {
-		return;
-	}
-	const messages = getNewMessages( previousCart, newCart );
-
-	messages.errors = getPrettyErrorMessages( messages.errors, { translate, selectedSiteSlug } );
-
-	if ( messages.errors?.length > 0 ) {
-		reduxDispatch(
-			errorNotice(
-				messages.errors.map( ( error ) => (
-					<p key={ `${ error.code }-${ error.message }` }>{ error.message }</p>
-				) ),
-				{ isPersistent: true }
-			)
-		);
-		return;
-	}
-
-	if ( messages.success?.length > 0 ) {
-		reduxDispatch(
-			successNotice(
-				messages.success.map( ( success ) => (
-					<p key={ `${ success.code }-${ success.message }` }>{ success.message }</p>
-				) )
-			)
-		);
-		return;
-	}
 }
