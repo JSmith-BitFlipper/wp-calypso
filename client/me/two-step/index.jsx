@@ -29,6 +29,7 @@ import Security2faBackupCodes from 'calypso/me/security-2fa-backup-codes';
 import Security2faDisable from 'calypso/me/security-2fa-disable';
 import Security2faKey from 'calypso/me/security-2fa-key';
 import Security2faSetup from 'calypso/me/security-2fa-setup';
+import Security2faWebauthn from 'calypso/me/security-2fa-webauthn';
 import SecuritySectionNav from 'calypso/me/security-section-nav';
 import twoStepAuthorization from 'calypso/lib/two-step-authorization';
 
@@ -93,6 +94,14 @@ class TwoStep extends Component {
 		return <Security2faKey />;
 	};
 
+	renderWebauthn = () => {
+		if ( this.props.isFetchingUserSettings ) {
+			return null;
+		}
+
+		return <Security2faWebauthn />;
+	};
+
 	renderBackupCodes = () => {
 		if ( this.props.isFetchingUserSettings || ! this.props.isTwoStepEnabled ) {
 			return null;
@@ -127,6 +136,7 @@ class TwoStep extends Component {
 				<Card>{ this.renderTwoStepSection() }</Card>
 
 				{ this.render2faKey() }
+				{ this.renderWebauthn() }
 				{ this.renderBackupCodes() }
 				{ this.renderApplicationPasswords() }
 			</Main>

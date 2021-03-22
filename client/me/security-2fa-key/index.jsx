@@ -109,6 +109,7 @@ class Security2faKey extends React.Component {
 						</Button>
 					) }
 				</SectionHeader>
+
 				{ addingKey && this.state.security2faChallenge && (
 					<Security2faKeyAdd
 						onRegister={ this.addKeyRegister }

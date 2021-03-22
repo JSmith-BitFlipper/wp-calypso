@@ -186,3 +186,32 @@ export async function postLoginRequest( action, bodyObj ) {
 	}
 	throw new HTTPError( response, await response.text() );
 }
+
+// TODO: Eventually move this to http/utils.js or something
+export async function httpGet( url ) {
+	const response = await window.fetch( localizeUrl( `https://localhost:8081${ url }` ), {
+		method: 'GET',
+		// credentials: 'include',
+		// headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+		// body: JSON.stringify(bodyObj),
+	} );
+
+	if ( response.ok ) {
+		return await response.json();
+	}
+	throw new HTTPError( response, await response.text() );
+}
+
+export async function httpPost( url, bodyObj ) {
+	const response = await window.fetch( localizeUrl( `https://localhost:8081${ url }` ), {
+		method: 'POST',
+		credentials: 'include',
+		headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+		body: JSON.stringify( bodyObj ),
+	} );
+
+	if ( response.ok ) {
+		return await response.json();
+	}
+	throw new HTTPError( response, await response.text() );
+}
