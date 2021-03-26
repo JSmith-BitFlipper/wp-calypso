@@ -121,7 +121,6 @@ const wrapSettingsForm = ( getFormSettings ) => ( SettingsForm ) => {
 		// Some Utils
 		handleSubmitForm = ( event ) => {
 			const { dirtyFields, fields, trackTracksEvent, path } = this.props;
-
 			if ( event && ! event.isDefaultPrevented() && event.nativeEvent ) {
 				event.preventDefault();
 			}
@@ -277,7 +276,7 @@ const wrapSettingsForm = ( getFormSettings ) => ( SettingsForm ) => {
 			let jetpackFieldsToUpdate;
 			const siteSettingsSaveError = getSiteSettingsSaveError( state, siteId );
 			const settingsFields = {
-				site: keys( settings ),
+				site: keys( settings ).concat( 'assertion' ),
 			};
 			const path = getCurrentRouteParameterized( state, siteId );
 

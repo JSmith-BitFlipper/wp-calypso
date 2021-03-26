@@ -126,6 +126,9 @@ const makeRequest = ( originalParams, fn ) => {
 	const xhr = new window.XMLHttpRequest();
 	xhr.params = params;
 
+	// ADDED
+	// xhr.withCredentials = true;
+
 	// store the `XMLHttpRequest` instance so that "onmessage" can access it again
 	requests[ id ] = xhr;
 

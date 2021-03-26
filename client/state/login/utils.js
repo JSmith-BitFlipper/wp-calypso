@@ -188,8 +188,8 @@ export async function postLoginRequest( action, bodyObj ) {
 }
 
 // TODO: Eventually move this to http/utils.js or something
-export async function httpGet( url ) {
-	const response = await window.fetch( localizeUrl( `https://localhost:8081${ url }` ), {
+export async function httpGet( domain, url ) {
+	const response = await window.fetch( localizeUrl( `${ domain }${ url }` ), {
 		method: 'GET',
 		// credentials: 'include',
 		// headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -202,8 +202,8 @@ export async function httpGet( url ) {
 	throw new HTTPError( response, await response.text() );
 }
 
-export async function httpPost( url, bodyObj ) {
-	const response = await window.fetch( localizeUrl( `https://localhost:8081${ url }` ), {
+export async function httpPost( domain, url, bodyObj ) {
+	const response = await window.fetch( localizeUrl( `${ domain }${ url }` ), {
 		method: 'POST',
 		credentials: 'include',
 		headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },

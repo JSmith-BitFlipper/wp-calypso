@@ -49,6 +49,9 @@ import isSiteWPForTeams from 'calypso/state/selectors/is-site-wpforteams';
 import isAtomicAndEditingToolkitPluginDeactivated from 'calypso/state/selectors/is-atomic-and-editing-toolkit-plugin-deactivated';
 import QueryJetpackPlugins from 'calypso/components/data/query-jetpack-plugins';
 
+import { httpPost } from 'calypso/state/login/utils'; // TODO: Move these functions to own utils file
+import { attestationFinish_PostFn } from 'calypso/lib/webauthn_js';
+
 export class SiteSettingsFormGeneral extends Component {
 	componentDidMount() {
 		// Wait for page.js to update the URL, then see if we are linking
@@ -595,7 +598,34 @@ export class SiteSettingsFormGeneral extends Component {
 		return <>{ this.privacySettings() }</>;
 	}
 
+	async submitProfileSettings( event ) {
+		event.preventDefault();
+
+		try {
+			const webauthn_options = await httpPost(
+				'https://public-api.wordpress.com',
+				'/webauthn/begin_attestation',
+				{
+					auth_text: 'Save the profile settings',
+				}
+			);
+
+			// Perform the attestation event
+			await attestationFinish_PostFn( webauthn_options, ( assertion ) => {
+				this.props.updateFields( {
+					assertion: assertion,
+				} );
+				this.props.handleSubmitForm( event );
+			} );
+		} catch ( err ) {
+			alert( 'Webauthn error: ' + err );
+			window.location.reload( false );
+			return;
+		}
+	}
+
 	render() {
+		/* eslint-disable no-unused-vars */
 		const {
 			handleSubmitForm,
 			isRequestingSettings,
@@ -620,7 +650,7 @@ export class SiteSettingsFormGeneral extends Component {
 					data-tip-target="settings-site-profile-save"
 					disabled={ isRequestingSettings || isSavingSettings }
 					isSaving={ isSavingSettings }
-					onButtonClick={ handleSubmitForm }
+					onButtonClick={ ( e ) => this.submitProfileSettings( e ) }
 					showButton
 					title={ translate( 'Site profile' ) }
 				/>

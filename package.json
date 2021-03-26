@@ -306,6 +306,7 @@
 		"webpack-dev-server": "^4.0.0-beta.0",
 		"whybundled": "^1.4.2",
 		"wpcom": "^6.0.0",
+		"wpcom-xhr-request": "^1.2.0",
 		"yargs": "^15.3.1"
 	},
 	"optionalDependencies": {

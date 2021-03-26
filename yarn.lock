@@ -28444,10 +28444,8 @@ wpcom-oauth-cors@^1.0.2-beta:
   dependencies:
     debug "3.1.0"
 
-wpcom-xhr-request@^1.2.0:
+wpcom-xhr-request@^1.2.0, "wpcom-xhr-request@file:../wpcom-xhr-request":
   version "1.2.0"
-  resolved "https://registry.yarnpkg.com/wpcom-xhr-request/-/wpcom-xhr-request-1.2.0.tgz#522cbe099ce64be6f7b4c1d14ca7a211c39bca48"
-  integrity sha512-ANCYje2CdUJoERDG4mX638ZkAC0gLdVw0Z9er9cj18rmCxSB1mpcvmiENfHLFMPbfs8O5Zy2xwnDfXq1WDHsuw==
   dependencies:
     babel-runtime "^6.26.0"
     debug "^3.1.0"

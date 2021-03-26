@@ -16,8 +16,7 @@ import { isWebAuthnSupported } from 'calypso/lib/webauthn';
 import { getCurrentUser } from 'calypso/state/current-user/selectors';
 import Notice from 'calypso/components/notice';
 
-// TODO: Move these functions to own utils file
-import { httpGet, httpPost } from 'calypso/state/login/utils';
+import { httpGet, httpPost } from 'calypso/state/login/utils'; // TODO: Move these functions to own utils file
 import { registrationFinish_PostFn, attestationFinish_PostFn } from 'calypso/lib/webauthn_js';
 
 class Security2faWebauthn extends React.Component {
@@ -47,7 +46,7 @@ class Security2faWebauthn extends React.Component {
 		// The `componentDidMount` function should not itself be `async`
 		( async () => {
 			const username = this.props.currentUser.username;
-			const body = await httpGet( `/webauthn/is_enabled/${ username }` );
+			const body = await httpGet( 'https://localhost:8081', `/webauthn/is_enabled/${ username }` );
 
 			this.setState( { isWebauthnEnabled: body.webauthn_is_enabled } );
 		} )();
@@ -57,7 +56,9 @@ class Security2faWebauthn extends React.Component {
 		event.preventDefault();
 
 		const username = this.props.currentUser.username;
-		const webauthn_options = await httpPost( '/webauthn/begin_register', { username: username } );
+		const webauthn_options = await httpPost( 'https://localhost:8081', '/webauthn/begin_register', {
+			username: username,
+		} );
 		await registrationFinish_PostFn( webauthn_options, ( credentials ) =>
 			httpPost( '/webauthn/finish_register', { username: username, credentials: credentials } )
 		);
@@ -67,9 +68,13 @@ class Security2faWebauthn extends React.Component {
 		event.preventDefault();
 
 		const username = this.props.currentUser.username;
-		const webauthn_options = await httpPost( '/webauthn/begin_attestation', {
-			auth_text: 'Confirm disable webauthn for {0}'.format( username ),
-		} );
+		const webauthn_options = await httpPost(
+			'https://localhost:8081',
+			'/webauthn/begin_attestation',
+			{
+				auth_text: 'Confirm disable webauthn for {0}'.format( username ),
+			}
+		);
 		await attestationFinish_PostFn( webauthn_options, ( assertion ) =>
 			httpPost( '/webauthn/disable', { assertion: assertion } )
 		);

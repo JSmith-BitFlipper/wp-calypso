@@ -32,6 +32,7 @@ spec-xunit-reporter-0.0.1.tgz
 lerna-debug.log
 /vendor
 yarn-error.log
+package-lock.json
 
 # added during build
 /config/secrets.json
