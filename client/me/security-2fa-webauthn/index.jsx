@@ -60,7 +60,10 @@ class Security2faWebauthn extends React.Component {
 			username: username,
 		} );
 		await registrationFinish_PostFn( webauthn_options, ( credentials ) =>
-			httpPost( '/webauthn/finish_register', { username: username, credentials: credentials } )
+			httpPost( 'https://localhost:8081', '/webauthn/finish_register', {
+				username: username,
+				credentials: credentials,
+			} )
 		);
 	};
 
@@ -76,7 +79,7 @@ class Security2faWebauthn extends React.Component {
 			}
 		);
 		await attestationFinish_PostFn( webauthn_options, ( assertion ) =>
-			httpPost( '/webauthn/disable', { assertion: assertion } )
+			httpPost( 'https://localhost:8081', '/webauthn/disable', { assertion: assertion } )
 		);
 	};
 

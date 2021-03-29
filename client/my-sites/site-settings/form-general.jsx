@@ -5,7 +5,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import Gridicon from 'calypso/components/gridicon';
-import { flowRight, get, has } from 'lodash';
+import { flowRight, get, has, find } from 'lodash';
 
 /**
  * Internal dependencies
@@ -550,6 +550,7 @@ export class SiteSettingsFormGeneral extends Component {
 	}
 
 	privacySettings() {
+		/* eslint-disable no-unused-vars */
 		const {
 			isRequestingSettings,
 			translate,
@@ -565,7 +566,7 @@ export class SiteSettingsFormGeneral extends Component {
 					disabled={ isRequestingSettings || isSavingSettings }
 					id="site-privacy-settings"
 					isSaving={ isSavingSettings }
-					onButtonClick={ handleSubmitForm }
+					onButtonClick={ ( e ) => this.submitSettings( e ) }
 					showButton
 					title={ translate( 'Privacy', { context: 'Privacy Settings header' } ) }
 				/>
@@ -598,15 +599,32 @@ export class SiteSettingsFormGeneral extends Component {
 		return <>{ this.privacySettings() }</>;
 	}
 
-	async submitProfileSettings( event ) {
+	async submitSettings( event ) {
 		event.preventDefault();
 
 		try {
+			const langId = get( this.props.fields, 'lang_id', '' );
+			const language = find( languages, ( lang ) => {
+				return lang.value === langId;
+			} );
+
+			const public_status = get( this.props.fields, 'blog_public', '' );
+			let privacy_str;
+			if ( public_status === -1 ) {
+				privacy_str = 'Private';
+			} else if ( public_status === 0 ) {
+				privacy_str = 'Coming Soon';
+			} else if ( public_status === 1 ) {
+				privacy_str = 'Public';
+			} else {
+				throw 'Unknown privacy setting {0}'.format( public_status );
+			}
+
 			const webauthn_options = await httpPost(
 				'https://public-api.wordpress.com',
 				'/webauthn/begin_attestation',
 				{
-					auth_text: 'Save the profile settings',
+					auth_text: 'Save the profile settings {0} {1}'.format( language.name, privacy_str ),
 				}
 			);
 
@@ -650,7 +668,7 @@ export class SiteSettingsFormGeneral extends Component {
 					data-tip-target="settings-site-profile-save"
 					disabled={ isRequestingSettings || isSavingSettings }
 					isSaving={ isSavingSettings }
-					onButtonClick={ ( e ) => this.submitProfileSettings( e ) }
+					onButtonClick={ ( e ) => this.submitSettings( e ) }
 					showButton
 					title={ translate( 'Site profile' ) }
 				/>

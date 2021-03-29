@@ -293,6 +293,7 @@ Undocumented.prototype.sendInvites = function (
 	usernamesOrEmails,
 	role,
 	message,
+	assertion,
 	isExternal,
 	fn
 ) {
@@ -306,6 +307,7 @@ Undocumented.prototype.sendInvites = function (
 			role: role,
 			message: message,
 			source: 'calypso',
+			assertion: assertion,
 		},
 		fn
 	);

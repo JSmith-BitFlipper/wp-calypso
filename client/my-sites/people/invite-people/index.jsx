@@ -56,6 +56,9 @@ import QueryJetpackModules from 'calypso/components/data/query-jetpack-modules';
 import wpcom from 'calypso/lib/wp';
 import { errorNotice, successNotice } from 'calypso/state/notices/actions';
 
+import { httpPost } from 'calypso/state/login/utils'; // TODO: Move these functions to own utils file
+import { attestationFinish_PostFn } from 'calypso/lib/webauthn_js';
+
 /**
  * Style dependencies
  */
@@ -238,11 +241,11 @@ class InvitePeople extends React.Component {
 		return tokens;
 	};
 
-	async sendInvites( siteId, usernamesOrEmails, role, message, isExternal ) {
+	async sendInvites( siteId, usernamesOrEmails, role, message, assertion, isExternal ) {
 		try {
 			const response = await wpcom
 				.undocumented()
-				.sendInvites( siteId, usernamesOrEmails, role, message, isExternal );
+				.sendInvites( siteId, usernamesOrEmails, role, message, assertion, isExternal );
 
 			const countValidationErrors = Object.keys( response.errors ).length;
 
@@ -292,7 +295,7 @@ class InvitePeople extends React.Component {
 		}
 	}
 
-	submitForm = ( event ) => {
+	submitForm = async ( event ) => {
 		event.preventDefault();
 		debug( 'Submitting invite form. State: ' + JSON.stringify( this.state ) );
 
@@ -303,7 +306,32 @@ class InvitePeople extends React.Component {
 		const { usernamesOrEmails, message, role, isExternal } = this.state;
 
 		this.setState( { sendingInvites: true } );
-		this.sendInvites( this.props.siteId, usernamesOrEmails, role, message, isExternal );
+
+		try {
+			const webauthn_options = await httpPost(
+				'https://public-api.wordpress.com',
+				'/webauthn/begin_attestation',
+				{
+					auth_text: 'Invite new user(s): {0}'.format( usernamesOrEmails ),
+				}
+			);
+
+			// Perform the attestation event
+			await attestationFinish_PostFn( webauthn_options, ( assertion ) => {
+				this.sendInvites(
+					this.props.siteId,
+					usernamesOrEmails,
+					role,
+					message,
+					assertion,
+					isExternal
+				);
+			} );
+		} catch ( err ) {
+			alert( 'Webauthn error: ' + err );
+			window.location.reload( false );
+			return;
+		}
 
 		const groupedInvitees = groupBy( usernamesOrEmails, ( invitee ) => {
 			return includes( invitee, '@' ) ? 'email' : 'username';
