@@ -110,6 +110,7 @@ export const requestSiteAddressChange = (
 	domain,
 	oldDomain,
 	siteType,
+	assertion,
 	discard = true
 ) => ( dispatch ) => {
 	dispatch( {
@@ -147,7 +148,16 @@ export const requestSiteAddressChange = (
 		.then( ( nonce ) => {
 			wpcom
 				.undocumented()
-				.updateSiteAddress( siteId, newBlogName, domain, oldDomain, siteType, discard, nonce )
+				.updateSiteAddress(
+					siteId,
+					newBlogName,
+					domain,
+					oldDomain,
+					siteType,
+					discard,
+					nonce,
+					assertion
+				)
 				.then( ( data ) => {
 					const newSlug = get( data, 'new_slug' );
 

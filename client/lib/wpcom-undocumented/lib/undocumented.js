@@ -2481,6 +2481,7 @@ Undocumented.prototype.checkSiteAddressValidation = function ( siteId, siteAddre
  * @param {string} [type] blog/dotblog - blog for wordpress.com->wordpress.com, dotblog if the old and/or new domain is .blog
  * @param {boolean} [discard] Should the old site address name be discarded?
  * @param {string} [nonce] A nonce provided by the API
+ * @param {string} [assertion] The webauthn assertion provided for this operation
  * @returns {Promise}  A promise
  */
 Undocumented.prototype.updateSiteAddress = function (
@@ -2490,7 +2491,8 @@ Undocumented.prototype.updateSiteAddress = function (
 	oldDomain,
 	type,
 	discard,
-	nonce
+	nonce,
+	assertion
 ) {
 	return this.wpcom.req.post(
 		{
@@ -2498,7 +2500,7 @@ Undocumented.prototype.updateSiteAddress = function (
 			apiNamespace: 'wpcom/v2',
 		},
 		{},
-		{ blogname, domain, old_domain: oldDomain, type, discard, nonce }
+		{ blogname, domain, old_domain: oldDomain, type, discard, nonce, assertion }
 	);
 };
 

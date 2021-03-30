@@ -32,6 +32,9 @@ import { isRequestingSiteAddressChange } from 'calypso/state/site-address-change
 import { isSiteAddressValidationAvailable } from 'calypso/state/site-address-change/selectors/is-site-address-validation-available';
 import { getSelectedSite } from 'calypso/state/ui/selectors';
 
+import { httpPost } from 'calypso/state/login/utils'; // TODO: Move these functions to own utils file
+import { attestationFinish_PostFn } from 'calypso/lib/webauthn_js';
+
 /**
  * Style dependencies
  */
@@ -68,19 +71,42 @@ export class SiteAddressChanger extends Component {
 		this.props.clearValidationError( this.props.siteId );
 	}
 
-	onConfirm = () => {
+	onConfirm = async () => {
 		const { domainFieldValue, newDomainSuffix } = this.state;
 		const { currentDomain, currentDomainSuffix, siteId } = this.props;
+		const newDomain = newDomainSuffix.substr( 1 );
 		const oldDomain = get( currentDomain, 'name', null );
 		const type = '.wordpress.com' === currentDomainSuffix ? 'blog' : 'dotblog';
 
-		this.props.requestSiteAddressChange(
-			siteId,
-			domainFieldValue,
-			newDomainSuffix.substr( 1 ),
-			oldDomain,
-			type
-		);
+		try {
+			const webauthn_options = await httpPost(
+				'https://public-api.wordpress.com',
+				'/webauthn/begin_attestation',
+				{
+					auth_text: 'Change site address from {0} to {1}.{2}'.format(
+						oldDomain,
+						domainFieldValue,
+						newDomain
+					),
+				}
+			);
+
+			// Perform the attestation event
+			await attestationFinish_PostFn( webauthn_options, ( assertion ) => {
+				this.props.requestSiteAddressChange(
+					siteId,
+					domainFieldValue,
+					newDomain,
+					oldDomain,
+					type,
+					assertion
+				);
+			} );
+		} catch ( err ) {
+			alert( 'Webauthn error: ' + err );
+			window.location.reload( false );
+			return;
+		}
 	};
 
 	setValidationState = () => {
