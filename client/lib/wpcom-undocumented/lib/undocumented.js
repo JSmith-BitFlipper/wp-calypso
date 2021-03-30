@@ -1702,7 +1702,13 @@ Undocumented.prototype.activeTheme = function ( siteId, fn ) {
 	return this.wpcom.req.get( { path: '/sites/' + siteId + '/themes/mine' }, fn );
 };
 
-Undocumented.prototype.activateTheme = function ( themeId, siteId, dontChangeHomepage, fn ) {
+Undocumented.prototype.activateTheme = function (
+	themeId,
+	siteId,
+	dontChangeHomepage,
+	assertion,
+	fn
+) {
 	debug( '/sites/:site_id/themes/mine' );
 	return this.wpcom.req.post(
 		{
@@ -1710,6 +1716,7 @@ Undocumented.prototype.activateTheme = function ( themeId, siteId, dontChangeHom
 			body: {
 				theme: themeId,
 				...( dontChangeHomepage && { dont_change_homepage: true } ),
+				assertion,
 			},
 		},
 		fn

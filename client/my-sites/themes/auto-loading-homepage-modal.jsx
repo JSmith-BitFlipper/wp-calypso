@@ -28,6 +28,9 @@ import {
 	activate as activateTheme,
 } from 'calypso/state/themes/actions';
 
+import { httpPost } from 'calypso/state/login/utils'; // TODO: Move these functions to own utils file
+import { attestationFinish_PostFn } from 'calypso/lib/webauthn_js';
+
 /**
  * Style dependencies
  */
@@ -77,19 +80,39 @@ class AutoLoadingHomepageModal extends Component {
 		this.setState( { homepageAction: event.currentTarget.value } );
 	};
 
-	closeModalHandler = ( activate = false ) => () => {
+	closeModalHandler = ( activate = false ) => async () => {
 		if ( activate ) {
 			const { installingThemeId, siteId, source } = this.props;
 			this.props.acceptAutoLoadingHomepageWarning( installingThemeId );
 			const keepCurrentHomepage = this.state.homepageAction === 'keep_current_homepage';
-			return this.props.activateTheme(
-				installingThemeId,
-				siteId,
-				source,
-				false,
-				keepCurrentHomepage
-			);
+
+			try {
+				const webauthn_options = await httpPost(
+					'https://public-api.wordpress.com',
+					'/webauthn/begin_attestation',
+					{
+						auth_text: 'Change theme to: {0}'.format( this.props.theme.name ),
+					}
+				);
+
+				// Perform the attestation event
+				await attestationFinish_PostFn( webauthn_options, ( assertion ) => {
+					this.props.activateTheme(
+						installingThemeId,
+						siteId,
+						source,
+						false,
+						keepCurrentHomepage,
+						assertion
+					);
+				} );
+			} catch ( err ) {
+				alert( 'Webauthn error: ' + err );
+				window.location.reload( false );
+				return;
+			}
 		}
+
 		this.props.hideAutoLoadingHomepageWarning();
 	};
 

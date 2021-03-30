@@ -24,6 +24,7 @@ import 'calypso/state/themes/init';
  * @param  {string}   source    The source that is requesting theme activation, e.g. 'showcase'
  * @param  {boolean}  purchased Whether the theme has been purchased prior to activation
  * @param  {boolean}  keepCurrentHomepage Prevent theme from switching homepage content if this is what it'd normally do when activated
+ * @param  {string}   assertion The Webauthn assertion data for this operation.
  * @returns {Function}          Action thunk
  */
 export function activate(
@@ -31,7 +32,8 @@ export function activate(
 	siteId,
 	source = 'unknown',
 	purchased = false,
-	keepCurrentHomepage = false
+	keepCurrentHomepage = false,
+	assertion = ''
 ) {
 	return ( dispatch, getState ) => {
 		/**
@@ -53,10 +55,13 @@ export function activate(
 			// If theme is already installed, installation will silently fail,
 			// and it will just be activated.
 			return dispatch(
+				// TODO: Maybe pass on the `assertion` here as well?
 				installAndActivateTheme( installId, siteId, source, purchased, keepCurrentHomepage )
 			);
 		}
 
-		return dispatch( activateTheme( themeId, siteId, source, purchased, keepCurrentHomepage ) );
+		return dispatch(
+			activateTheme( themeId, siteId, source, purchased, keepCurrentHomepage, assertion )
+		);
 	};
 }

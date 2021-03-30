@@ -21,6 +21,7 @@ import 'calypso/state/themes/init';
  * @param {string} source    The source that is requesting theme activation, e.g. 'showcase'
  * @param {boolean} purchased Whether the theme has been purchased prior to activation
  * @param {boolean} keepCurrentHomepage Prevent theme from switching homepage content if this is what it'd normally do when activated
+ * @param {string} assertion The Webauthn assertion data for this operation.
  * @returns {Function}           Action thunk
  */
 export function activateTheme(
@@ -28,7 +29,8 @@ export function activateTheme(
 	siteId,
 	source = 'unknown',
 	purchased = false,
-	keepCurrentHomepage = false
+	keepCurrentHomepage = false,
+	assertion = ''
 ) {
 	return ( dispatch ) => {
 		dispatch( {
@@ -39,7 +41,7 @@ export function activateTheme(
 
 		return wpcom
 			.undocumented()
-			.activateTheme( themeId, siteId, keepCurrentHomepage )
+			.activateTheme( themeId, siteId, keepCurrentHomepage, assertion )
 			.then( ( theme ) => {
 				// Fall back to ID for Jetpack sites which don't return a stylesheet attr.
 				const themeStylesheet = theme.stylesheet || themeId;
