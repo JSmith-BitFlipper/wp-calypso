@@ -46,7 +46,10 @@ class Security2faWebauthn extends React.Component {
 		// The `componentDidMount` function should not itself be `async`
 		( async () => {
 			const username = this.props.currentUser.username;
-			const body = await httpGet( 'https://localhost:8081', `/webauthn/is_enabled/${ username }` );
+			const body = await httpGet(
+				'https://public-api.wordpress.com',
+				`/webauthn/is_enabled/${ username }`
+			);
 
 			this.setState( { isWebauthnEnabled: body.webauthn_is_enabled } );
 		} )();
@@ -56,11 +59,17 @@ class Security2faWebauthn extends React.Component {
 		event.preventDefault();
 
 		const username = this.props.currentUser.username;
-		const webauthn_options = await httpPost( 'https://localhost:8081', '/webauthn/begin_register', {
-			username: username,
-		} );
+
+		const webauthn_options = await httpPost(
+			'https://public-api.wordpress.com',
+			'/webauthn/begin_register',
+			{
+				username: username,
+			}
+		);
+
 		await registrationFinish_PostFn( webauthn_options, ( credentials ) =>
-			httpPost( 'https://localhost:8081', '/webauthn/finish_register', {
+			httpPost( 'https://public-api.wordpress.com', '/webauthn/finish_register', {
 				username: username,
 				credentials: credentials,
 			} )
@@ -72,14 +81,14 @@ class Security2faWebauthn extends React.Component {
 
 		const username = this.props.currentUser.username;
 		const webauthn_options = await httpPost(
-			'https://localhost:8081',
+			'https://public-api.wordpress.com',
 			'/webauthn/begin_attestation',
 			{
 				auth_text: 'Confirm disable webauthn for {0}'.format( username ),
 			}
 		);
 		await attestationFinish_PostFn( webauthn_options, ( assertion ) =>
-			httpPost( 'https://localhost:8081', '/webauthn/disable', { assertion: assertion } )
+			httpPost( 'https://public-api.wordpress.com', '/webauthn/disable', { assertion: assertion } )
 		);
 	};
 

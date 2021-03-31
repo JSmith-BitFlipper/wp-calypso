@@ -203,10 +203,23 @@ export async function httpGet( domain, url ) {
 }
 
 export async function httpPost( domain, url, bodyObj ) {
+	let headers = {};
+
+	// Pass on the `Authorization` header for wordpress API calls
+	if ( domain === 'https://public-api.wordpress.com' ) {
+		// TODO: This is a hard-coded authorization token. Need to look this up from wp_api cookie.
+		headers = Object.assign( headers, {
+			Authorization: 'X-WPCOOKIE 9cda1546fd32d00522dc1a6dc44e2b50:1:https://calypso.localhost:3000',
+		} );
+	}
+
 	const response = await window.fetch( localizeUrl( `${ domain }${ url }` ), {
 		method: 'POST',
 		credentials: 'include',
-		headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+		headers: Object.assign( headers, {
+			Accept: 'application/json',
+			'Content-Type': 'application/x-www-form-urlencoded',
+		} ),
 		body: JSON.stringify( bodyObj ),
 	} );
 
