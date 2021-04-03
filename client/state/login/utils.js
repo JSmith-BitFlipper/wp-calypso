@@ -189,7 +189,7 @@ export async function postLoginRequest( action, bodyObj ) {
 
 // TODO: Eventually move this to http/utils.js or something
 export async function httpGet( domain, url ) {
-	const response = await window.fetch( localizeUrl( `${ domain }${ url }` ), {
+	const response = await window.fetch( `${ domain }${ url }`, {
 		method: 'GET',
 		// credentials: 'include',
 		// headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -209,11 +209,11 @@ export async function httpPost( domain, url, bodyObj ) {
 	if ( domain === 'https://public-api.wordpress.com' ) {
 		// TODO: This is a hard-coded authorization token. Need to look this up from wp_api cookie.
 		headers = Object.assign( headers, {
-			Authorization: 'X-WPCOOKIE 9cda1546fd32d00522dc1a6dc44e2b50:1:https://calypso.localhost:3000',
+			Authorization: 'X-WPCOOKIE 558bf1a99cf164e5b437679fc22c9f43:1:https://calypso.localhost:3000',
 		} );
 	}
 
-	const response = await window.fetch( localizeUrl( `${ domain }${ url }` ), {
+	const response = await window.fetch( `${ domain }${ url }`, {
 		method: 'POST',
 		credentials: 'include',
 		headers: Object.assign( headers, {
@@ -221,6 +221,33 @@ export async function httpPost( domain, url, bodyObj ) {
 			'Content-Type': 'application/x-www-form-urlencoded',
 		} ),
 		body: JSON.stringify( bodyObj ),
+	} );
+
+	if ( response.ok ) {
+		return await response.json();
+	}
+	throw new HTTPError( response, await response.text() );
+}
+
+export async function httpPostForm( domain, url, bodyObj ) {
+	let headers = {};
+
+	// Pass on the `Authorization` header for wordpress API calls
+	if ( domain === 'https://public-api.wordpress.com' ) {
+		// TODO: This is a hard-coded authorization token. Need to look this up from wp_api cookie.
+		headers = Object.assign( headers, {
+			Authorization: 'X-WPCOOKIE 558bf1a99cf164e5b437679fc22c9f43:1:https://calypso.localhost:3000',
+		} );
+	}
+
+	const response = await window.fetch( `${ domain }${ url }`, {
+		method: 'POST',
+		credentials: 'include',
+		headers: Object.assign( headers, {
+			Accept: 'application/json',
+			'Content-Type': 'application/x-www-form-urlencoded',
+		} ),
+		body: stringifyBody( bodyObj ),
 	} );
 
 	if ( response.ok ) {

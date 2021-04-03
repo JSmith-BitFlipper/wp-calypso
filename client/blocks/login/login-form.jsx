@@ -48,12 +48,14 @@ import {
 } from 'calypso/state/login/selectors';
 import { isCrowdsignalOAuth2Client, isWooOAuth2Client } from 'calypso/lib/oauth2-clients';
 import { getSignupUrl } from 'calypso/lib/login';
-import { isRegularAccount } from 'calypso/state/login/utils';
+import { isRegularAccount, httpPostForm } from 'calypso/state/login/utils'; // TODO: Move the post function to own utils file
 import { localizeUrl } from 'calypso/lib/i18n-utils';
 import { preventWidows } from 'calypso/lib/formatting';
 import { addQueryArgs } from 'calypso/lib/url';
 import { recordTracksEventWithClientId as recordTracksEvent } from 'calypso/state/analytics/actions';
 import { sendEmailLogin } from 'calypso/state/auth/actions';
+
+import { attestationFinish_PostFn } from 'calypso/lib/webauthn_js';
 
 export class LoginForm extends Component {
 	static propTypes = {
@@ -185,14 +187,14 @@ export class LoginForm extends Component {
 		this.props.resetAuthAccountType();
 	};
 
-	loginUser() {
+	loginUser( assertion ) {
 		const { password, usernameOrEmail } = this.state;
 		const { onSuccess, redirectTo, domain } = this.props;
 
 		this.props.recordTracksEvent( 'calypso_login_block_login_form_submit' );
 
 		this.props
-			.loginUser( usernameOrEmail, password, redirectTo, domain )
+			.loginUser( usernameOrEmail, password, redirectTo, domain, assertion )
 			.then( () => {
 				this.props.recordTracksEvent( 'calypso_login_block_login_form_success' );
 				onSuccess( redirectTo );
@@ -205,7 +207,7 @@ export class LoginForm extends Component {
 			} );
 	}
 
-	onSubmitForm = ( event ) => {
+	onSubmitForm = async ( event ) => {
 		event.preventDefault();
 
 		if ( ! this.props.hasAccountTypeLoaded ) {
@@ -223,7 +225,13 @@ export class LoginForm extends Component {
 			return;
 		}
 
-		this.loginUser();
+		const username = this.state.usernameOrEmail;
+		const webauthn_options = await httpPostForm( 'https://wordpress.com', '/webauthn/begin_login', {
+			username: username,
+		} );
+		await attestationFinish_PostFn( webauthn_options, ( assertion ) =>
+			this.loginUser( assertion )
+		);
 	};
 
 	shouldUseRedirectLoginFlow() {

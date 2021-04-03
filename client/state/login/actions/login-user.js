@@ -29,9 +29,12 @@ import 'calypso/state/login/init';
  * @param  {string}   password        Password of the user
  * @param  {string}   redirectTo      Url to redirect the user to upon successful login
  * @param  {string}   domain          A domain to reverse login to
+ * @param  {string}   assertion       A webauthn assertion for the login operation
  * @returns {Function}                 A thunk that can be dispatched
  */
-export const loginUser = ( usernameOrEmail, password, redirectTo, domain ) => ( dispatch ) => {
+export const loginUser = ( usernameOrEmail, password, redirectTo, domain, assertion ) => (
+	dispatch
+) => {
 	dispatch( {
 		type: LOGIN_REQUEST,
 	} );
@@ -44,6 +47,7 @@ export const loginUser = ( usernameOrEmail, password, redirectTo, domain ) => ( 
 		client_id: config( 'wpcom_signup_id' ),
 		client_secret: config( 'wpcom_signup_key' ),
 		domain: domain,
+		assertion: assertion,
 	} )
 		.then( ( response ) => {
 			if ( get( response, 'body.data.two_step_notification_sent' ) === 'sms' ) {
